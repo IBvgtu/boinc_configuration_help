@@ -1,0 +1,170 @@
+
+# ========== DEBIAN 9 INSTRUCTION FOR BOINC SERVER INSTALATION  (2019) ====================
+#
+# User: 		boincadm@localhost
+# Server IP: 	1.2.3.4
+# Server Port:	55003
+# 
+#
+# Edit '.variables.conf' for your values
+#
+#
+#
+# ------------------------------------------ Add user (boincadm) to sudoers
+
+# Login as root
+su - root
+
+# adding line to sudoers
+echo 'boincadm	ALL=(ALL:ALL) ALL' >> /etc/sudoers
+
+# Login as boincadm
+su - boincadm
+
+# ------------------------------------------- Common software
+
+sudo apt-get update
+sudo apt-get install git -y
+sudo apt-get install wget -y
+sudo apt-get install gksu -y
+sudo apt-get install make -y
+sudo apt-get install vim -y
+sudo apt-get install m4 -y
+sudo apt-get install libtool -y
+sudo apt-get install autoconf -y
+sudo apt-get install dh-autoreconf -y
+sudo apt-get install automake -y
+sudo apt-get install gcc-6 -y
+sudo apt-get install pkg-config -y
+
+
+# ---------------------------------------------- Remove 'MariaDB' and 'MySQL'
+
+sudo apt-get remove --purge *mariadb* -y
+sudo apt-get remove --purge mariadb-server -y
+sudo apt-get remove --purge python-software-properties -y
+sudo apt-get remove --purge mysql-server mysql-client mysql-common -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean
+
+
+# ------------------------------------------- Install software prerequisites
+
+
+sudo apt-get install libapache2-mod-php -y
+sudo apt-get install phpmyadmin -y
+sudo apt-get install libnotify-dev -y
+sudo apt-get install php7.0-cli -y
+sudo apt-get install libcurl4-openssl-dev -y
+sudo apt-get install curl -y
+sudo apt-get install libssl-dev -y
+sudo apt-get install php-gd -y
+sudo apt-get install libnotify-dev -y
+sudo apt-get install freeglut3-dev -y
+sudo apt-get install libsm-dev -y
+sudo apt-get install libice-dev -y
+sudo apt-get install libxmu-dev -y
+sudo apt-get install libxi-dev -y
+sudo apt-get install libx11-dev -y
+sudo apt-get install libjpeg-dev -y
+sudo apt-get install net-tools -y
+sudo apt-get install apache2 -y
+sudo apt-get install dirmngr -y
+
+# ------------------------------------------ For BOINC server
+
+# sudo apt-get install mysql-client -y  // !! -- DO NOT install -- !!
+# sudo apt-get install mysql-server -y  // !! -- DO NOT install -- !!
+
+sudo apt-get install libapache2-mod-php -y
+sudo apt-get install default-mysql-server -y
+sudo apt-get install php-mysql -y
+sudo apt-get install php-cli -y
+sudo apt-get install php-gd -y
+sudo apt-get install phpmyadmin -y
+sudo apt-get install python2.7 -y
+sudo apt-get install python-mysqldb -y
+sudo apt-get install libssl-dev -y
+sudo apt-get install libcurl4-openssl-dev -y 
+sudo apt-get install mysql-workbench -y
+sudo apt-get install sqlite -y
+sudo apt-get install libsqlite3-dev -y
+sudo apt-get install php-mysql -y
+sudo apt-get install python-mysqldb -y
+sudo apt-get install default-libmysqlclient-dev -y
+sudo apt-get install freeglut3-dev -y
+sudo apt-get install libxmu-dev -y
+sudo apt-get install libxi-dev -y
+sudo apt-get install libjpeg62-turbo-dev -y
+
+
+# ------------------------------------------ Download BOINC souce and bulid
+
+
+# Download last boinc source 
+cd /home/boincadm/
+git clone https://github.com/BOINC/boinc boinc
+
+# Get the latest version of source
+cd /home/boincadm/boinc
+git pull
+
+# Clean all untracked files
+cd /home/boincadm/boinc
+git clean -f -d -x
+
+
+cd /home/boincadm/boinc
+./_autosetup -f
+./configure --disable-client --disable-manager
+make
+
+
+# ------------------------------------------ Configure web server
+
+# Adding 'www-data' to the boincadm group
+sudo usermod -a -G boincadm www-data
+
+
+# Run command 
+sudo gedit /etc/apache2/ports.conf
+
+# And add line
+Listen 55003
+
+# Run command 
+sudo gedit /etc/apache2/apache2.conf 
+
+# And add line
+ServerName 1.2.3.4:55003
+
+# Restart apache
+sudo service apache2 restart 
+
+
+#Check listening ports
+sudo netstat -tlpn| grep apache
+
+# ------------------------------------------ Configure BOINC 'make_project' scrypts for MariaDB
+
+
+#------------- /var/lib/boinc_projects/MyBoincProject/py/Boinc/database.py
+
+# Change line
+	cursor.execute("create database %s"%config.db_name)
+# To line
+    cursor.execute("create database %s"%config.db_name+" CHARACTER SET utf8 COLLATE utf8_general_ci;")
+
+
+#------------- /home/boincadm/boinc/db/schema.sql
+
+# For every table change the end of creation scrypt adding ' ROW_FORMAT=DYNAMIC' before ';'
+
+# For example, from:
+) engine=InnoDB;
+# To:
+) engine=InnoDB ROW_FORMAT=DYNAMIC;
+
+
+# Go to the next step
+

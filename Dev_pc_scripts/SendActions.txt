@@ -1,0 +1,5 @@
+
+cd /home/boincadm/Desktop/BOINC_data/2_DeployProject
+./1_StopDaemons.sh
+./2_ManageData.sh
+#./3_StartDaemons.sh

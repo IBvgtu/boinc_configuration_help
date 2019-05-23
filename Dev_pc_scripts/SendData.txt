@@ -1,0 +1,7 @@
+
+
+rmdir /home/boincadm/Desktop/BOINC_data/2_DeployProject/InputData
+mkdir /home/boincadm/Desktop/BOINC_data/2_DeployProject/InputData
+
+put -r c:\Users\IgorPC\Desktop\Deploy\Data /home/boincadm/Desktop/BOINC_data/2_DeployProject/InputData
+exit
